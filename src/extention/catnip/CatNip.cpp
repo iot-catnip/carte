@@ -1,5 +1,5 @@
 
-#include <cstdio>
+#include <Arduino.h>
 #include "CatNip.h"
 
 
@@ -8,7 +8,7 @@ CatNip::CatNip() {
     this->packetType = 0;
     this->packetLength = 0;
     this->data = 0;
-    this->checksum;
+    this->checksum = 0;
 }
 
 void CatNip::encodeFrame() {
@@ -120,8 +120,12 @@ void CatNip::setData(int data) {
     this->data = data;
 }
 
-unsigned char *CatNip::getFrame() {
+uint8_t *CatNip::getFrame() {
     return this->frame;
+}
+
+int CatNip::getFrameSize(){
+    return this->packetLength;
 }
 
 void CatNip::detectFrameType() {
@@ -166,7 +170,7 @@ bool CatNip::checkMacAddress(unsigned char macAddress[]) {
     if (macAddress[6]) {
         return false;
     }
-    for (char i = 0; i < 6; i++) {
+    for (unsigned char i = 0; i < 6; i++) {
         if (macAddress[i] == 0) {
             return false;
         }
@@ -176,7 +180,7 @@ bool CatNip::checkMacAddress(unsigned char macAddress[]) {
 
 unsigned char CatNip::calculateChecksum(unsigned char frame[], char offset) {
     char sum = 0x0;
-    for (char i = 0; i < offset; ++i) {
+    for (unsigned char i = 0; i < offset; ++i) {
         sum += frame[i];
     }
     return sum % 16;
