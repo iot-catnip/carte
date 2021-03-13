@@ -12,7 +12,9 @@
 class ClientSocket {
     public:
         void sendPacket(CatNip catNip);
-        void setConnexion(char * address, int port);
+        void setConnexion(const char * address, uint16_t port);
+        void checkForRequest();
+        void disconect();
     private:
         WiFiClient client;
 };
