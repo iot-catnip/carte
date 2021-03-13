@@ -9,7 +9,7 @@
 #include <ACS712.h>
 #include "max6675.h"
 #include <WiFi.h>
-//#include "./extention/catnip/CatNip.h"
+#include "./extention/catnip/CatNip.h"
 
 //Libraries for OLED Display
 #include <Wire.h>
@@ -122,7 +122,6 @@ void loop() {
   display.println(WiFi.localIP());
   
 
-  WiFiServer Server;
   WiFiClient client;
   while (!client.connect("192.168.1.11",6000))
   {
@@ -135,14 +134,24 @@ void loop() {
   display.display();
 
   Serial.println("Connected to server successful!");
-  /**
+  
   CatNip cat;
-  cat.setPacketType(cat.DATA_TEMPERATURE);
-  cat.setData(bTemperature);
-  cat.encodeFrame();
-  **/
-  client.print("cc");
+  cat.setPacketType(CatNip::DATA_TEMPERATURE);
+  cat.setData(500);
 
+  
+  try{
+    cat.encodeFrame();
+    for (size_t i = 0; i < cat.getFrameSize()/8; i++)
+    {
+      Serial.printf("%x ",cat.getFrame()[i]);
+    }
+    Serial.print("\n");
+    client.write(cat.getFrame(),cat.getFrameSize()/8);
+  }catch(char* errors){
+    Serial.print(errors);
+  }
+  
   Serial.println("Disconnecting...");
   client.stop();
   

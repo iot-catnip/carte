@@ -196,14 +196,3 @@ unsigned char CatNip::getPacketType() {
 unsigned char CatNip::getFrameType() {
     return this->frameType;
 }
-
-int main(int argc, char *argv[]) {
-    unsigned char test[4] = {
-            0x02,
-            0x1A,
-            0x16,
-            0xF7,
-    };
-    printf("%d", CatNip::calculateChecksum(test, 4));
-    return 0;
-}
