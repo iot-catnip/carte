@@ -8,6 +8,8 @@
 #include <DHT.h>
 #include <ACS712.h>
 #include "max6675.h"
+#include <WiFi.h>
+//#include "./extention/catnip/CatNip.h"
 
 //Libraries for OLED Display
 #include <Wire.h>
@@ -43,6 +45,11 @@ float temperature = 55;
 float bTemperature = 30;
 DHT dht(DHTPIN, DHTTYPE);
 
+//------------------- WIFI ----------------------
+#define SSID "Freebox-017025"
+#define PASSWORD "obruentes-pudendum-addicerent#2-elegea94"
+//------------------END WIFI----------------------
+
 MAX6675 thermocouple(thermo_CLK, thermo_CS, thermo_DO);
 
 void setup() {
@@ -67,6 +74,14 @@ void setup() {
   //initialize Serial Monitor
   Serial.begin(115200);
   
+  WiFi.begin(SSID,PASSWORD);
+
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    Serial.print("Conneting to WiFi");
+  }
+  
   //SPI LoRa pins
   //SPI.begin(SCK, MISO, MOSI, SS);
   //setup LoRa transceiver module
@@ -76,7 +91,7 @@ void setup() {
   display.print("Initialisation");
   display.display();
 
-   dht.begin();
+  dht.begin();  
 }
 
 
@@ -103,8 +118,34 @@ void loop() {
    /// Tmeperature thermocouple
   display.print("Temperature: ");
   display.println(thermocouple.readCelsius());
+  display.println("Connected to WiFi");
+  display.println(WiFi.localIP());
   
+
+  WiFiServer Server;
+  WiFiClient client;
+  while (!client.connect("192.168.1.11",6000))
+  {
+    Serial.println("Connection to host failed");
+        delay(1000);
+        return;
+  }
+
+  display.println("msg"+client.readString());
   display.display();
+
+  Serial.println("Connected to server successful!");
+  /**
+  CatNip cat;
+  cat.setPacketType(cat.DATA_TEMPERATURE);
+  cat.setData(bTemperature);
+  cat.encodeFrame();
+  **/
+  client.print("cc");
+
+  Serial.println("Disconnecting...");
+  client.stop();
+  
   
   // Délai entre chaque mesure.
   delay(10000);
