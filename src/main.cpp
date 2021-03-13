@@ -9,12 +9,15 @@
 #include <ACS712.h>
 #include "max6675.h"
 #include <WiFi.h>
-#include "./extention/catnip/CatNip.h"
 
 //Libraries for OLED Display
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+
+//Project class
+#include "./extention/catnip/CatNip.h"
+#include "./extention/socket/ClientSocket.h"
 
 // ------------------- PINS ----------------------
 // MAX6575 module (T° sensor)
@@ -120,18 +123,11 @@ void loop() {
   display.println(thermocouple.readCelsius());
   display.println("Connected to WiFi");
   display.println(WiFi.localIP());
-  
-
-  WiFiClient client;
-  while (!client.connect("192.168.1.11",6000))
-  {
-    Serial.println("Connection to host failed");
-        delay(1000);
-        return;
-  }
-
-  display.println("msg"+client.readString());
   display.display();
+
+  ClientSocket socket;
+  socket.setConnexion("192.168.1.11",6000);
+
 
   Serial.println("Connected to server successful!");
   
@@ -147,15 +143,15 @@ void loop() {
       Serial.printf("%x ",cat.getFrame()[i]);
     }
     Serial.print("\n");
-    client.write(cat.getFrame(),cat.getFrameSize()/8);
+    socket.sendPacket(cat);
   }catch(char* errors){
     Serial.print(errors);
   }
   
   Serial.println("Disconnecting...");
-  client.stop();
   
-  
+  socket.checkForRequest();
+  socket.disconect();
   // Délai entre chaque mesure.
   delay(10000);
 }
