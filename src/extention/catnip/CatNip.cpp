@@ -9,6 +9,7 @@ CatNip::CatNip() {
     this->packetLength = 0;
     this->data = 0;
     this->checksum = 0;
+    this->macAddress[0]=0;
 }
 
 void CatNip::encodeFrame() {
@@ -53,8 +54,8 @@ void CatNip::encodeFrame() {
         this->frame[0] = CatNip::START_FRAME;
         this->frame[1] = this->packetLength;
         this->frame[2] = this->packetType;
-        this->frame[3] = this->data & 0xFF;
-        this->frame[4] = (this->data >> 8) & 0xFF;
+        this->frame[3] = (this->data >> 8) & 0xFF;
+        this->frame[4] = this->data & 0xFF;
         this->frame[5] = CatNip::calculateChecksum(this->frame, 5);
         return;
     }
@@ -100,10 +101,12 @@ void CatNip::setPacketType(unsigned char packetType) {
         packetType == CatNip::STATUS_RECEIVED ||
         packetType == CatNip::STATUS_HELLO ||
         packetType == CatNip::DATA_CONSUMATION ||
+        packetType == CatNip::DATA_TEMPERATURE ||
         packetType == CatNip::DATA_HUMIDITY ||
         packetType == CatNip::DATA_CONSUMATION ||
         packetType == CatNip::DATA_ON) {
         this->packetType = packetType;
+        return;
     }
     throw "UNKNOWN_TYPE_ERROR : unknown packet type client";
 }
@@ -116,7 +119,7 @@ void CatNip::setMacAddress(unsigned char macAddress[6]) {
     *this->macAddress = *macAddress;
 }
 
-void CatNip::setData(int data) {
+void CatNip::setData(short int data) {
     this->data = data;
 }
 
@@ -179,7 +182,7 @@ bool CatNip::checkMacAddress(unsigned char macAddress[]) {
 }
 
 unsigned char CatNip::calculateChecksum(unsigned char frame[], char offset) {
-    char sum = 0x0;
+    unsigned char sum = 0x0;
     for (unsigned char i = 0; i < offset; ++i) {
         sum += frame[i];
     }

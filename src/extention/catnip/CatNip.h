@@ -52,7 +52,7 @@ public:
 
     void setMacAddress(unsigned char[6]);
 
-    void setData(int data);
+    void setData(short int data);
 
     uint8_t *getFrame();
 
