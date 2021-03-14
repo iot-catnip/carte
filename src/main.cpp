@@ -88,10 +88,6 @@ void setup() {
 
   socket.setConnexion("192.168.1.11",6000);
 
-  //SPI LoRa pins
-  //SPI.begin(SCK, MISO, MOSI, SS);
-  //setup LoRa transceiver module
-  //LoRa.setPins(SS, RST, DIO0);
   
   display.setCursor(0,0);
   display.print("Initialisation");
