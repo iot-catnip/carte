@@ -17,7 +17,13 @@ class ClientSocket {
         void checkForRequest();
         void disconect();
     private:
+        bool awaitResponse = false;
+        CatNip sendFrame;
         WiFiClient client;
         const char * address;
         uint16_t port;
+        void evaluateRequest(CatNip cat);
+        void setupAwaitFrame(CatNip cat);
+        void unsetAwaitFrame();
+        void sendAwaitFrame();
 };
