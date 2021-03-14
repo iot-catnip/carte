@@ -44,7 +44,7 @@ public:
 
     void encodeFrame();
 
-    void decodeFrame(unsigned char[4]);
+    boolean decodeFrame(unsigned char[4]);
 
     static unsigned char calculateChecksum(unsigned char[10],char offset);
 
@@ -79,7 +79,7 @@ private :
     //Array with max Size of 10
     uint8_t frame[10];
 
-    void detectFrameType();
+    boolean detectFrameType();
     static bool checkMacAddress(unsigned char macAddress[6]);
 
 };

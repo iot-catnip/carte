@@ -72,7 +72,7 @@ void CatNip::encodeFrame() {
     }
 }
 
-void CatNip::decodeFrame(unsigned char frame[4]) {
+boolean CatNip::decodeFrame(unsigned char frame[4]) {
     if (frame[0] == CatNip::START_FRAME) {
         if (frame[1] == CatNip::PACKET_STATUS_LENGTH) {
             if (frame[2] == CatNip::STATUS_ALIVE ||
@@ -84,16 +84,25 @@ void CatNip::decodeFrame(unsigned char frame[4]) {
                 frame[2] == CatNip::ACTION_ON ||
                 frame[2] == CatNip::ACTION_OFF) {
                 if (calculateChecksum(frame, 3) == frame[3]) {
-                    this->detectFrameType();
                     this->packetType = frame[2];
+                    this->detectFrameType();
+                    return true;
                 }
-                throw "DECODE_FRAME_ERROR : Wrong Checksum -> not a CATNIP frame";
+                Serial.println("DECODE_FRAME_ERROR : Wrong Checksum -> not a CATNIP frame");
+                return false;
+                //throw "DECODE_FRAME_ERROR : Wrong Checksum -> not a CATNIP frame";
             }
-            throw "DECODE_FRAME_ERROR : not supported packet type -> not a CATNIP frame";
+            Serial.println("DECODE_FRAME_ERROR : not supported packet type -> not a CATNIP frame");
+            //throw "DECODE_FRAME_ERROR : not supported packet type -> not a CATNIP frame";
+            return false;
         }
-        throw "DECODE_FRAME_ERROR : Wrong Length -> not a CATNIP frame";
+        Serial.println("DECODE_FRAME_ERROR : Wrong Length -> not a CATNIP frame");
+        return false;
+        //throw "DECODE_FRAME_ERROR : Wrong Length -> not a CATNIP frame";
     }
-    throw "DECODE_FRAME_ERROR : Not a CATNIP frame";
+    Serial.println("DECODE_FRAME_ERROR : Not a CATNIP frame");
+    return false;
+    //throw "DECODE_FRAME_ERROR : Not a CATNIP frame";
 }
 
 void CatNip::setPacketType(unsigned char packetType) {
@@ -131,15 +140,17 @@ int CatNip::getFrameSize(){
     return this->packetLength;
 }
 
-void CatNip::detectFrameType() {
+boolean CatNip::detectFrameType() {
     if (this->packetType == 0) {
-        throw "CANT_BE_NULL : packetType can't be null";
+        Serial.println("CANT_BE_NULL : packetType can't be null");
+        return false;
+        //throw "CANT_BE_NULL : packetType can't be null";
     }
 
     if (this->packetType == CatNip::STATUS_HELLO) {
         this->frameType = CatNip::PACKET_HELLO;
         this->packetLength = CatNip::PACKET_HELLO_LENGTH;
-        return;
+        return true;
     }
 
     if (this->packetType == CatNip::STATUS_ALIVE ||
@@ -151,9 +162,9 @@ void CatNip::detectFrameType() {
         this->packetType == CatNip::ACTION_ON ||
         this->packetType == CatNip::ACTION_OFF) {
 
-        this->packetType = CatNip::PACKET_STATUS;
+        this->frameType = CatNip::PACKET_STATUS;
         this->packetLength = CatNip::PACKET_STATUS_LENGTH;
-        return;
+        return true;
     }
 
     if (this->packetType == CatNip::DATA_CONSUMATION ||
@@ -163,10 +174,11 @@ void CatNip::detectFrameType() {
 
         this->frameType = CatNip::PACKET_DATA;
         this->packetLength = CatNip::PACKET_DATA_LENGTH;
-        return;
+        return true;
     }
-
-    throw "UNKNOWN_TYPE_ERROR frameType";
+    Serial.println("UNKNOWN_TYPE_ERROR frameType");
+    return false;
+    //throw "UNKNOWN_TYPE_ERROR frameType";
 }
 
 bool CatNip::checkMacAddress(unsigned char macAddress[]) {
