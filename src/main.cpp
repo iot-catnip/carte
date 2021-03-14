@@ -55,6 +55,7 @@ DHT dht(DHTPIN, DHTTYPE);
 
 MAX6675 thermocouple(thermo_CLK, thermo_CS, thermo_DO);
 
+ClientSocket socket;
 void setup() {
   
   //reset OLED display via software
@@ -84,7 +85,9 @@ void setup() {
     delay(500);
     Serial.print("Conneting to WiFi");
   }
-  
+
+  socket.setConnexion("192.168.1.11",6000);
+
   //SPI LoRa pins
   //SPI.begin(SCK, MISO, MOSI, SS);
   //setup LoRa transceiver module
@@ -125,33 +128,9 @@ void loop() {
   display.println(WiFi.localIP());
   display.display();
 
-  ClientSocket socket;
-  socket.setConnexion("192.168.1.11",6000);
-
-
-  Serial.println("Connected to server successful!");
-  
-  CatNip cat;
-  cat.setPacketType(CatNip::DATA_TEMPERATURE);
-  cat.setData(500);
-
-  
-  try{
-    cat.encodeFrame();
-    for (size_t i = 0; i < cat.getFrameSize()/8; i++)
-    {
-      Serial.printf("%x ",cat.getFrame()[i]);
-    }
-    Serial.print("\n");
-    socket.sendPacket(cat);
-  }catch(char* errors){
-    Serial.print(errors);
-  }
-  
-  Serial.println("Disconnecting...");
-  
+  socket.restoreConnexion();
   socket.checkForRequest();
   socket.disconect();
   // Délai entre chaque mesure.
-  delay(10000);
+  delay(500);
 }

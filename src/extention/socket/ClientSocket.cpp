@@ -7,6 +7,8 @@
 
 void ClientSocket::setConnexion(const char *address, uint16_t port){
     WiFiClient client;
+    this->address = address;
+    this->port = port;
     while (!client.connect(address,port))
     {
         Serial.println("Connection to host failed");
@@ -14,6 +16,15 @@ void ClientSocket::setConnexion(const char *address, uint16_t port){
         return;
     }
     this->client = client;
+}
+
+void ClientSocket::restoreConnexion(){
+    if (!client.connected())
+    {
+        Serial.println("Restore Connexion");
+        this->setConnexion(this->address,this->port);
+    }
+    
 }
 
 void ClientSocket::sendPacket(CatNip cat){
@@ -34,14 +45,24 @@ void ClientSocket::sendPacket(CatNip cat){
 }
 
 void ClientSocket::disconect(){
-    this->client.stop();
+    if (!client.connected()) {
+        Serial.println("Not Connected Close Socket");
+        this->client.stop();
+    }
 }
 
 void ClientSocket::checkForRequest(){
-    char buffer;
-    if (client.available()) {
-        buffer = this->client.read();
-        Serial.print(buffer);
+    if (client.available())
+    {
+        unsigned char buffer[10];
+        int i = 0;
+        while (client.available()) {
+            int read;
+            read = this->client.read();
+            Serial.printf("%x ",read);
+            buffer[i]=read;
+            i++;
+        }
         Serial.printf("\n");
     }
 }

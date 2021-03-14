@@ -13,8 +13,11 @@ class ClientSocket {
     public:
         void sendPacket(CatNip catNip);
         void setConnexion(const char * address, uint16_t port);
+        void restoreConnexion();
         void checkForRequest();
         void disconect();
     private:
         WiFiClient client;
+        const char * address;
+        uint16_t port;
 };
