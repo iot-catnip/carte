@@ -96,6 +96,21 @@ boolean CatNip::decodeFrame(unsigned char frame[4]) {
             //throw "DECODE_FRAME_ERROR : not supported packet type -> not a CATNIP frame";
             return false;
         }
+        if (frame[1] == CatNip::PACKET_DATA_LENGTH)
+        {
+            if(frame[2] == CatNip::DATA_PORT){
+                if (calculateChecksum(frame, 5) == frame[5])
+                {
+                    this->packetType = frame[2];
+                    this->detectFrameType();
+                    this->data = ( frame[3] << 8 ) | frame[4];
+                }
+                
+            }
+            Serial.println("DECODE_FRAME_ERROR : Wrong type -> not a CATNIP frame");
+            return false;
+        }
+        
         Serial.println("DECODE_FRAME_ERROR : Wrong Length -> not a CATNIP frame");
         return false;
         //throw "DECODE_FRAME_ERROR : Wrong Length -> not a CATNIP frame";

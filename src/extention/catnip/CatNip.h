@@ -23,6 +23,7 @@ public:
     static const unsigned char DATA_HUMIDITY = 0x5B;
     static const unsigned char DATA_CONSUMATION = 0x5C;
     static const unsigned char DATA_ON = 0x5D;
+    static const unsigned char DATA_PORT = 0x5F;
     static const unsigned char ACTION_ON = 0x61;
     static const unsigned char ACTION_OFF = 0x60;
 
