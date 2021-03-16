@@ -105,7 +105,8 @@ boolean CatNip::decodeFrame(unsigned char frame[4]) {
                     this->detectFrameType();
                     this->data = ( frame[3] << 8 ) | frame[4];
                 }
-                
+                Serial.println("DECODE_FRAME_ERROR : Wrong Checksum -> not a CATNIP frame");
+                return false;
             }
             Serial.println("DECODE_FRAME_ERROR : Wrong type -> not a CATNIP frame");
             return false;
@@ -185,7 +186,8 @@ boolean CatNip::detectFrameType() {
     if (this->packetType == CatNip::DATA_CONSUMATION ||
         this->packetType == CatNip::DATA_HUMIDITY ||
         this->packetType == CatNip::DATA_ON ||
-        this->packetType == CatNip::DATA_TEMPERATURE) {
+        this->packetType == CatNip::DATA_TEMPERATURE ||
+        this->packetType == CatNip::DATA_PORT) {
 
         this->frameType = CatNip::PACKET_DATA;
         this->packetLength = CatNip::PACKET_DATA_LENGTH;
