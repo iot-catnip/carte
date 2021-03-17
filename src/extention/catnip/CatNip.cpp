@@ -26,13 +26,16 @@ void CatNip::encodeFrame() {
 
     if (this->frameType == CatNip::PACKET_HELLO) {
         if (this->packetLength != CatNip::PACKET_HELLO_LENGTH) {
-            throw "ENCODE_FRAME_ERROR : packetLength must have packet hello length";
+            Serial.print("ENCODE_FRAME_ERROR : packetLength must have packet hello length");
+            return;
         }
         if (this->packetType != CatNip::STATUS_HELLO) {
-            throw "ENCODE_FRAME_ERROR : packetType must be status Hello to encode Hello Frame";
+            Serial.print("ENCODE_FRAME_ERROR : packetType must be status Hello to encode Hello Frame");
+            return;
         }
         if (!CatNip::checkMacAddress(this->macAddress)) {
-            throw "ENCODE_FRAME_ERROR : mac Address is not defined";
+            Serial.print("ENCODE_FRAME_ERROR : mac Address is not defined");
+            return;
         }
         this->frame[0] = CatNip::START_FRAME;
         this->frame[1] = this->packetLength;
@@ -101,9 +104,17 @@ boolean CatNip::decodeFrame(unsigned char frame[4]) {
             if(frame[2] == CatNip::DATA_PORT){
                 if (calculateChecksum(frame, 5) == frame[5])
                 {
-                    this->packetType = frame[2];
-                    this->detectFrameType();
-                    this->data = ( frame[3] << 8 ) | frame[4];
+                    uint_fast16_t data = ( frame[4] << 8 ) | frame[3];
+                    Serial.println(data);
+                    if (data>=25000 && data<=25100)
+                    {
+                        this->packetType = frame[2];
+                        this->detectFrameType();
+                        this->data = data;
+                        return true;
+                    }
+                    Serial.println("DECODE_FRAME_ERROR : Wrong port -> only beetween 25000 and 25100");
+                    return false;
                 }
                 Serial.println("DECODE_FRAME_ERROR : Wrong Checksum -> not a CATNIP frame");
                 return false;
@@ -136,12 +147,17 @@ void CatNip::setPacketType(unsigned char packetType) {
     throw "UNKNOWN_TYPE_ERROR : unknown packet type client";
 }
 
-void CatNip::setMacAddress(unsigned char macAddress[6]) {
-    for (int i = 0; i < 7; ++i) {
-        if (macAddress[i]==0)
-            throw "UNKNOWN_TYPE_ERROR : Not mac address";
+void CatNip::setMacAddress(uint8_t macAddress[6]) {
+    if (CatNip::checkMacAddress(macAddress))
+    {
+        for (int i = 6 - 1; i >= 0; i--)
+        {
+            this->macAddress[i]=macAddress[i];
+        }
+        return;
+    }else{
+        Serial.println("UNKNOW_TYPE_ERROR : Not mac address");
     }
-    *this->macAddress = *macAddress;
 }
 
 void CatNip::setData(short int data) {
@@ -154,6 +170,10 @@ uint8_t *CatNip::getFrame() {
 
 int CatNip::getFrameSize(){
     return this->packetLength;
+}
+
+uint16_t CatNip::getData(){
+    return this->data;
 }
 
 boolean CatNip::detectFrameType() {
@@ -198,10 +218,7 @@ boolean CatNip::detectFrameType() {
     //throw "UNKNOWN_TYPE_ERROR frameType";
 }
 
-bool CatNip::checkMacAddress(unsigned char macAddress[]) {
-    if (macAddress[6]) {
-        return false;
-    }
+bool CatNip::checkMacAddress(uint8_t macAddress[6]) {
     for (unsigned char i = 0; i < 6; i++) {
         if (macAddress[i] == 0) {
             return false;

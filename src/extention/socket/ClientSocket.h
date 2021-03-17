@@ -11,17 +11,21 @@
 
 class ClientSocket {
     public:
+        ClientSocket();
+        void setMacAddress(uint8_t[6]);
         void sendPacket(CatNip catNip);
-        void setConnexion(const char * address, uint16_t port);
+        void setConnexion(const char * address);
         void restoreConnexion();
         void checkForRequest();
         void disconect();
     private:
+        static const uint16_t handCheckPort = 7788;
+        unsigned char mac[6];
         bool awaitResponse = false;
         CatNip sendFrame;
         WiFiClient client;
         const char * address;
-        uint16_t port;
+        uint16_t port = 0;
         void evaluateRequest(CatNip cat);
         void setupAwaitFrame(CatNip cat);
         void unsetAwaitFrame();

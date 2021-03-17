@@ -51,7 +51,7 @@ public:
 
     void setPacketType(unsigned char packetType);
 
-    void setMacAddress(unsigned char[6]);
+    void setMacAddress(uint8_t *macAddress);
 
     void setData(short int data);
 
@@ -60,6 +60,8 @@ public:
     unsigned char getPacketType();
 
     unsigned char getFrameType();
+
+    uint16_t getData();
 
     int getFrameSize();
 
@@ -73,10 +75,10 @@ private :
     unsigned char frameType;
     unsigned char packetLength;
     unsigned char packetType;
-    short int data;
+    unsigned short int data;
     unsigned char checksum;
     //Array with Size of 6
-    unsigned char macAddress[6];
+    uint8_t macAddress[6];
     //Array with max Size of 10
     uint8_t frame[10];
 

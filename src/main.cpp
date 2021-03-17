@@ -83,10 +83,15 @@ void setup() {
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(500);
-    Serial.print("Conneting to WiFi");
+    Serial.println("Conneting to WiFi");
   }
 
-  socket.setConnexion("192.168.1.11",6000);
+  unsigned char mac[6];
+  WiFi.macAddress(mac);
+  Serial.print("mac : ");
+  Serial.println(mac[1]);
+  socket.setMacAddress(mac);
+  socket.setConnexion("192.168.1.11");
 
   
   display.setCursor(0,0);
@@ -128,5 +133,5 @@ void loop() {
   socket.checkForRequest();
   socket.disconect();
   // Délai entre chaque mesure.
-  delay(500);
+  delay(5000);
 }
