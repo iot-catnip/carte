@@ -23,7 +23,6 @@ void ClientSocket::setConnexion(const char *address)
     WiFiClient client;
     this->address = address;
     //if we don't know the port
-    Serial.print("test : " + this->port);
     if (this->port == ClientSocket::handCheckPort)
     {
         while (!client.connect(address, ClientSocket::handCheckPort))
@@ -45,21 +44,15 @@ void ClientSocket::setConnexion(const char *address)
         this->sendFrame = cat;
 
         this->awaitResponse = true;
-        return;
     }
     else
     {
         //if it's the first connexion with server disonnect first and reconnect to the saved port.
         if (client.remotePort() != this->port)
         {
-            while (client.connected())
-            {
-                client.flush();
-            }
+            client.flush();
             client.stop();
         }
-
-        Serial.println("port" + this->port);
 
         while (!client.connect(address, this->port))
         {
@@ -67,17 +60,17 @@ void ClientSocket::setConnexion(const char *address)
             delay(1000);
             return;
         }
-        Serial.println("Connected");
+        Serial.println("Connected to server on port "+this->port);
         this->awaitResponse = false;
-        return;
     }
+    this->forceReconnexion = false;
 }
 
 void ClientSocket::restoreConnexion()
 {
-    if (!client.connected())
+    if (!client.connected()||this->forceReconnexion)
     {
-        Serial.println("Try to restore connexion");
+        Serial.println("Try to reconnect");
         this->setConnexion(this->address);
     }
 }
@@ -118,14 +111,17 @@ void ClientSocket::checkForRequest()
     {
         unsigned char buffer[6];
         int i = 0;
+        String log;
+        log = "Incoming transmision : <Buffer";
         while (client.available() || i < 5)
         {
             int read;
             read = this->client.read();
             buffer[i] = read;
-            Serial.println(read);
+            log += " "+read;
             i++;
         }
+        Serial.println(log+">");
 
         CatNip cat;
         if (cat.decodeFrame(buffer))
@@ -182,6 +178,7 @@ void ClientSocket::evaluateRequest(CatNip cat)
         break;
     case CatNip::DATA_PORT:
         this->port = cat.getData();
+        this->forceReconnexion = true;
         catResponse.setPacketType(CatNip::STATUS_RECEIVED);
         this->unsetAwaitFrame();
         break;

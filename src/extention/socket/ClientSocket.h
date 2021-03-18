@@ -22,6 +22,7 @@ class ClientSocket {
         static const uint16_t handCheckPort = 7788;
         unsigned char mac[6];
         bool awaitResponse = false;
+        bool forceReconnexion = false;
         CatNip sendFrame;
         WiFiClient client;
         const char * address;

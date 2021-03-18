@@ -105,7 +105,6 @@ boolean CatNip::decodeFrame(unsigned char frame[4]) {
                 if (calculateChecksum(frame, 5) == frame[5])
                 {
                     uint_fast16_t data = ( frame[4] << 8 ) | frame[3];
-                    Serial.println(data);
                     if (data>=25000 && data<=25100)
                     {
                         this->packetType = frame[2];
