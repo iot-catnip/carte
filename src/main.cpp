@@ -8,11 +8,16 @@
 #include <DHT.h>
 #include <ACS712.h>
 #include "max6675.h"
+#include <WiFi.h>
 
 //Libraries for OLED Display
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+
+//Project class
+#include "./extention/catnip/CatNip.h"
+#include "./extention/socket/ClientSocket.h"
 
 // ------------------- PINS ----------------------
 // MAX6575 module (T° sensor)
@@ -43,8 +48,14 @@ float temperature = 55;
 float bTemperature = 30;
 DHT dht(DHTPIN, DHTTYPE);
 
+//------------------- WIFI ----------------------
+#define SSID "Freebox-017025"
+#define PASSWORD "obruentes-pudendum-addicerent#2-elegea94"
+//------------------END WIFI----------------------
+
 MAX6675 thermocouple(thermo_CLK, thermo_CS, thermo_DO);
 
+ClientSocket socket;
 void setup() {
   
   //reset OLED display via software
@@ -67,16 +78,27 @@ void setup() {
   //initialize Serial Monitor
   Serial.begin(115200);
   
-  //SPI LoRa pins
-  //SPI.begin(SCK, MISO, MOSI, SS);
-  //setup LoRa transceiver module
-  //LoRa.setPins(SS, RST, DIO0);
+  WiFi.begin(SSID,PASSWORD);
+
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    Serial.println("Conneting to WiFi");
+  }
+
+  unsigned char mac[6];
+  WiFi.macAddress(mac);
+  Serial.print("mac : ");
+  Serial.printf("%x-%x-%x-%x-%x-%x\n",mac[0],mac[1],mac[2],mac[3],mac[4],mac[5]);
+  socket.setMacAddress(mac);
+  socket.setConnexion("192.168.1.11");
+
   
   display.setCursor(0,0);
   display.print("Initialisation");
   display.display();
 
-   dht.begin();
+  dht.begin();  
 }
 
 
@@ -103,9 +125,13 @@ void loop() {
    /// Tmeperature thermocouple
   display.print("Temperature: ");
   display.println(thermocouple.readCelsius());
-  
+  display.println("Connected to WiFi");
+  display.println(WiFi.localIP());
   display.display();
-  
+
+  socket.restoreConnexion();
+  socket.checkForRequest();
+  socket.disconect();
   // Délai entre chaque mesure.
-  delay(10000);
+  delay(5000);
 }
