@@ -86,6 +86,7 @@ void loop() {
 
   display.clearDisplay();
 
+  // Température DHT11
   temperature = dht.readTemperature();
   
   display.setCursor(0,0);
@@ -99,10 +100,11 @@ void loop() {
     display.println(bTemperature);
   }
 
+  // Humidité DHT11
   display.print("Humidity: ");
   display.println(dht.readHumidity());
 
-   /// Temperature thermocouple
+  // Temperature thermocouple
   display.print("Temperature: ");
   display.println(thermocouple.readCelsius());
   
