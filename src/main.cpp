@@ -3,7 +3,7 @@
   Complete project details at https://RandomNerdTutorials.com/ttgo-lora32-sx1276-arduino-ide/
 *********/
 
-//Libraries
+//Libraries for sensors
 #include <SPI.h>
 #include <DHT.h>
 #include <ACS712.h>
@@ -20,14 +20,14 @@
 #define thermo_DO 19
 #define thermo_CS 21
 
-// DHT11 module (humidity sensor)
+// DHT11 module (T° + humidity sensor)
 #define DHTPIN 17
 #define DHTTYPE DHT11
 
 // ACS712 module (current sensor)
 #define ACSPIN 35
 
-//OLED pins
+// OLED pins
 #define OLED_SDA 4
 #define OLED_SCL 15 
 #define OLED_RST 16
@@ -76,7 +76,7 @@ void setup() {
   display.print("Initialisation");
   display.display();
 
-   dht.begin();
+  dht.begin();
 }
 
 
@@ -96,8 +96,7 @@ void loop() {
   else{
     display.println(bTemperature);
   }
-  /*
-  display.print("Humidity: ");
+  /* display.print("Humidity: ");
   display.println(measurement.humidity);*/
 
    /// Tmeperature thermocouple
