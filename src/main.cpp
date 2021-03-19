@@ -22,7 +22,6 @@
 
 // DHT11 module (T° + humidity sensor)
 #define DHTPIN 17
-#define DHTTYPE DHT11
 
 // ACS712 module (current sensor)
 #define ACSPIN 35
@@ -36,14 +35,19 @@
 
 //-------------------- END PINS -----------------------
 
+// Initialisation écran OLED
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RST);
 
-/** Initialize DHT sensor */
+// Initialisation capteur DHT11
 float temperature = 55;
 float bTemperature = 30;
-DHT dht(DHTPIN, DHTTYPE);
+DHT dht(DHTPIN, DHT11);
 
+// Initialisation capteur thermocouple
 MAX6675 thermocouple(thermo_CLK, thermo_CS, thermo_DO);
+
+// Initialisation capteur courant
+ACS712 acsCurrent(ACS712_20A, ACSPIN);
 
 void setup() {
   
@@ -66,17 +70,16 @@ void setup() {
   
   //initialize Serial Monitor
   Serial.begin(115200);
-  
-  //SPI LoRa pins
-  //SPI.begin(SCK, MISO, MOSI, SS);
-  //setup LoRa transceiver module
-  //LoRa.setPins(SS, RST, DIO0);
-  
+    
   display.setCursor(0,0);
   display.print("Initialisation");
   display.display();
 
+  // initialisation DHT
   dht.begin();
+
+  // initialisation ACS
+  int zero = acsCurrent.calibrate();
 }
 
 
@@ -107,6 +110,13 @@ void loop() {
   // Temperature thermocouple
   display.print("Temperature: ");
   display.println(thermocouple.readCelsius());
+
+  // Mesure courant
+  float courant = acsCurrent.getCurrentAC();
+  display.print("Courant: ");
+  display.println(courant);
+  display.print("Puissance: ");
+  display.print(courant*230);
   
   display.display();
 }
