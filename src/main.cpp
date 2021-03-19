@@ -8,11 +8,16 @@
 #include <DHT.h>
 #include <ACS712.h>
 #include "max6675.h"
+#include <WiFi.h>
 
 //Libraries for OLED Display
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+
+//Project class
+#include "./extention/catnip/CatNip.h"
+#include "./extention/socket/ClientSocket.h"
 
 // ------------------- PINS ----------------------
 // MAX6575 module (T° sensor)
@@ -49,6 +54,15 @@ MAX6675 thermocouple(thermo_CLK, thermo_CS, thermo_DO);
 // Initialisation capteur courant
 ACS712 acsCurrent(ACS712_20A, ACSPIN);
 
+MAX6675 thermocouple(thermo_CLK, thermo_CS, thermo_DO);
+
+//------------------- WIFI ----------------------
+#define SSID "Freebox-017025"
+#define PASSWORD "obruentes-pudendum-addicerent#2-elegea94"
+//------------------END WIFI----------------------
+
+ClientSocket socket;
+
 void setup() {
   
   //reset OLED display via software
@@ -70,7 +84,22 @@ void setup() {
   
   //initialize Serial Monitor
   Serial.begin(115200);
-    
+  
+  WiFi.begin(SSID,PASSWORD);
+
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    Serial.println("Conneting to WiFi");
+  }
+
+  unsigned char mac[6];
+  WiFi.macAddress(mac);
+  Serial.print("mac : ");
+  Serial.printf("%x-%x-%x-%x-%x-%x\n",mac[0],mac[1],mac[2],mac[3],mac[4],mac[5]);
+  socket.setMacAddress(mac);
+  socket.setConnexion("192.168.1.11");
+
   display.setCursor(0,0);
   display.print("Initialisation");
   display.display();
@@ -118,5 +147,11 @@ void loop() {
   display.print("Puissance: ");
   display.print(courant*230);
   
+  display.println("Connected to WiFi");
+  display.println(WiFi.localIP());
   display.display();
+
+  socket.restoreConnexion();
+  socket.checkForRequest();
+  socket.disconect();
 }
