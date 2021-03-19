@@ -98,14 +98,13 @@ void loop() {
   else{
     display.println(bTemperature);
   }
-  /* display.print("Humidity: ");
-  display.println(measurement.humidity);*/
 
-   /// Tmeperature thermocouple
+  display.print("Humidity: ");
+  display.println(dht.readHumidity());
+
+   /// Temperature thermocouple
   display.print("Temperature: ");
   display.println(thermocouple.readCelsius());
   
   display.display();
-  
-  
 }
