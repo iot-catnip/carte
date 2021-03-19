@@ -3,7 +3,7 @@
   Complete project details at https://RandomNerdTutorials.com/ttgo-lora32-sx1276-arduino-ide/
 *********/
 
-//Libraries
+//Libraries for sensors
 #include <SPI.h>
 #include <DHT.h>
 #include <ACS712.h>
@@ -21,18 +21,17 @@
 
 // ------------------- PINS ----------------------
 // MAX6575 module (T° sensor)
-#define thermo_CLK 5
+#define thermo_CLK 18
 #define thermo_DO 19
-#define thermo_CS 21
+#define thermo_CS 23
 
-// DHT11 module (humidity sensor)
+// DHT11 module (T° + humidity sensor)
 #define DHTPIN 17
-#define DHTTYPE DHT11
 
 // ACS712 module (current sensor)
 #define ACSPIN 35
 
-//OLED pins
+// OLED pins
 #define OLED_SDA 4
 #define OLED_SCL 15 
 #define OLED_RST 16
@@ -41,21 +40,29 @@
 
 //-------------------- END PINS -----------------------
 
+// Initialisation écran OLED
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RST);
 
-/** Initialize DHT sensor */
+// Initialisation capteur DHT11
 float temperature = 55;
 float bTemperature = 30;
-DHT dht(DHTPIN, DHTTYPE);
+DHT dht(DHTPIN, DHT11);
+
+// Initialisation capteur thermocouple
+MAX6675 thermocouple(thermo_CLK, thermo_CS, thermo_DO);
+
+// Initialisation capteur courant
+ACS712 acsCurrent(ACS712_20A, ACSPIN);
+
+MAX6675 thermocouple(thermo_CLK, thermo_CS, thermo_DO);
 
 //------------------- WIFI ----------------------
 #define SSID "Freebox-017025"
 #define PASSWORD "obruentes-pudendum-addicerent#2-elegea94"
 //------------------END WIFI----------------------
 
-MAX6675 thermocouple(thermo_CLK, thermo_CS, thermo_DO);
-
 ClientSocket socket;
+
 void setup() {
   
   //reset OLED display via software
@@ -93,19 +100,25 @@ void setup() {
   socket.setMacAddress(mac);
   socket.setConnexion("192.168.1.11");
 
-  
   display.setCursor(0,0);
   display.print("Initialisation");
   display.display();
 
-  dht.begin();  
+  // initialisation DHT
+  dht.begin();
+
+  // initialisation ACS
+  int zero = acsCurrent.calibrate();
 }
 
 
 void loop() {
+  // Délai entre chaque mesure.
+  delay(4000);
 
   display.clearDisplay();
 
+  // Température DHT11
   temperature = dht.readTemperature();
   
   display.setCursor(0,0);
@@ -118,13 +131,22 @@ void loop() {
   else{
     display.println(bTemperature);
   }
-  /*
-  display.print("Humidity: ");
-  display.println(measurement.humidity);*/
 
-   /// Tmeperature thermocouple
+  // Humidité DHT11
+  display.print("Humidity: ");
+  display.println(dht.readHumidity());
+
+  // Temperature thermocouple
   display.print("Temperature: ");
   display.println(thermocouple.readCelsius());
+
+  // Mesure courant
+  float courant = acsCurrent.getCurrentAC();
+  display.print("Courant: ");
+  display.println(courant);
+  display.print("Puissance: ");
+  display.print(courant*230);
+  
   display.println("Connected to WiFi");
   display.println(WiFi.localIP());
   display.display();
@@ -132,6 +154,4 @@ void loop() {
   socket.restoreConnexion();
   socket.checkForRequest();
   socket.disconect();
-  // Délai entre chaque mesure.
-  delay(5000);
 }
