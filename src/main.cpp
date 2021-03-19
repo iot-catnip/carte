@@ -16,9 +16,9 @@
 
 // ------------------- PINS ----------------------
 // MAX6575 module (T° sensor)
-#define thermo_CLK 5
+#define thermo_CLK 18
 #define thermo_DO 19
-#define thermo_CS 21
+#define thermo_CS 23
 
 // DHT11 module (T° + humidity sensor)
 #define DHTPIN 17
@@ -81,6 +81,8 @@ void setup() {
 
 
 void loop() {
+  // Délai entre chaque mesure.
+  delay(4000);
 
   display.clearDisplay();
 
@@ -105,6 +107,5 @@ void loop() {
   
   display.display();
   
-  // Délai entre chaque mesure.
-  delay(10000);
+  
 }
