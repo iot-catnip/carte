@@ -54,8 +54,6 @@ MAX6675 thermocouple(thermo_CLK, thermo_CS, thermo_DO);
 // Initialisation capteur courant
 ACS712 acsCurrent(ACS712_20A, ACSPIN);
 
-MAX6675 thermocouple(thermo_CLK, thermo_CS, thermo_DO);
-
 //------------------- WIFI ----------------------
 #define SSID "Freebox-017025"
 #define PASSWORD "obruentes-pudendum-addicerent#2-elegea94"
@@ -145,7 +143,7 @@ void loop() {
   display.print("Courant: ");
   display.println(courant);
   display.print("Puissance: ");
-  display.print(courant*230);
+  display.println(courant*230);
   
   display.println("Connected to WiFi");
   display.println(WiFi.localIP());
