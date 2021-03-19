@@ -99,29 +99,6 @@ boolean CatNip::decodeFrame(unsigned char frame[4]) {
             //throw "DECODE_FRAME_ERROR : not supported packet type -> not a CATNIP frame";
             return false;
         }
-        if (frame[1] == CatNip::PACKET_DATA_LENGTH)
-        {
-            if(frame[2] == CatNip::DATA_PORT){
-                if (calculateChecksum(frame, 5) == frame[5])
-                {
-                    uint_fast16_t data = ( frame[4] << 8 ) | frame[3];
-                    if (data>=25000 && data<=25100)
-                    {
-                        this->packetType = frame[2];
-                        this->detectFrameType();
-                        this->data = data;
-                        return true;
-                    }
-                    Serial.println("DECODE_FRAME_ERROR : Wrong port -> only beetween 25000 and 25100");
-                    return false;
-                }
-                Serial.println("DECODE_FRAME_ERROR : Wrong Checksum -> not a CATNIP frame");
-                return false;
-            }
-            Serial.println("DECODE_FRAME_ERROR : Wrong type -> not a CATNIP frame");
-            return false;
-        }
-        
         Serial.println("DECODE_FRAME_ERROR : Wrong Length -> not a CATNIP frame");
         return false;
         //throw "DECODE_FRAME_ERROR : Wrong Length -> not a CATNIP frame";
@@ -205,8 +182,7 @@ boolean CatNip::detectFrameType() {
     if (this->packetType == CatNip::DATA_CONSUMATION ||
         this->packetType == CatNip::DATA_HUMIDITY ||
         this->packetType == CatNip::DATA_ON ||
-        this->packetType == CatNip::DATA_TEMPERATURE ||
-        this->packetType == CatNip::DATA_PORT) {
+        this->packetType == CatNip::DATA_TEMPERATURE) {
 
         this->frameType = CatNip::PACKET_DATA;
         this->packetLength = CatNip::PACKET_DATA_LENGTH;
