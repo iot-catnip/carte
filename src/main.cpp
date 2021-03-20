@@ -4,10 +4,6 @@
 *********/
 
 //Libraries for sensors
-#include <SPI.h>
-#include <DHT.h>
-#include <ACS712.h>
-#include "max6675.h"
 #include <WiFi.h>
 
 //Libraries for OLED Display
@@ -18,19 +14,7 @@
 //Project class
 #include "./extention/catnip/CatNip.h"
 #include "./extention/socket/ClientSocket.h"
-
-// ------------------- PINS ----------------------
-// MAX6575 module (T° sensor)
-#define thermo_CLK 18
-#define thermo_DO 19
-#define thermo_CS 23
-
-// DHT11 module (T° + humidity sensor)
-#define DHTPIN 17
-
-// ACS712 module (current sensor)
-#define ACSPIN 35
-
+#include "./extention/sensor/Sensors.h"
 // OLED pins
 #define OLED_SDA 4
 #define OLED_SCL 15 
@@ -43,23 +27,13 @@
 // Initialisation écran OLED
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RST);
 
-// Initialisation capteur DHT11
-float temperature = 55;
-float bTemperature = 30;
-DHT dht(DHTPIN, DHT11);
-
-// Initialisation capteur thermocouple
-MAX6675 thermocouple(thermo_CLK, thermo_CS, thermo_DO);
-
-// Initialisation capteur courant
-ACS712 acsCurrent(ACS712_20A, ACSPIN);
-
 //------------------- WIFI ----------------------
 #define SSID "Freebox-017025"
 #define PASSWORD "obruentes-pudendum-addicerent#2-elegea94"
 //------------------END WIFI----------------------
 
 ClientSocket socket;
+Sensors sensors;
 
 void setup() {
   
@@ -103,10 +77,7 @@ void setup() {
   display.display();
 
   // initialisation DHT
-  dht.begin();
-
-  // initialisation ACS
-  int zero = acsCurrent.calibrate();
+  sensors.init();
 }
 
 
@@ -117,39 +88,30 @@ void loop() {
   display.clearDisplay();
 
   // Température DHT11
-  temperature = dht.readTemperature();
-  
   display.setCursor(0,0);
   display.print("Temperature: ");
-  
-  if(!isnan(temperature)){
-    bTemperature = temperature;
-    display.println(temperature);
-  }
-  else{
-    display.println(bTemperature);
-  }
+  display.println(sensors.getTemperature());
 
   // Humidité DHT11
   display.print("Humidity: ");
-  display.println(dht.readHumidity());
+  display.println(sensors.getHumidity());
 
   // Temperature thermocouple
   display.print("Temperature: ");
-  display.println(thermocouple.readCelsius());
+  display.println(sensors.getTermoTemperature());
 
   // Mesure courant
-  float courant = acsCurrent.getCurrentAC();
   display.print("Courant: ");
-  display.println(courant);
+  display.println(sensors.getCourant());
   display.print("Puissance: ");
-  display.println(courant*230);
+  display.println(sensors.getPower());
   
+  // Afficher Wifi
   display.println("Connected to WiFi");
   display.println(WiFi.localIP());
   display.display();
 
   socket.restoreConnexion();
-  socket.checkForRequest();
+  socket.checkForRequest(sensors);
   socket.disconect();
 }

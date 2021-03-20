@@ -8,6 +8,7 @@
 #include <WiFi.h>
 #include "ClientSocket.h"
 #include "../catnip/CatNip.h"
+#include "../sensor/Sensors.h"
 
 class ClientSocket {
     public:
@@ -16,7 +17,7 @@ class ClientSocket {
         void sendPacket(CatNip catNip);
         void setConnexion(const char * address);
         void restoreConnexion();
-        void checkForRequest();
+        void checkForRequest(Sensors sensors);
         void disconect();
     private:
         static const uint16_t handCheckPort = 7788;
@@ -27,7 +28,7 @@ class ClientSocket {
         WiFiClient client;
         const char * address;
         uint16_t port = 0;
-        void evaluateRequest(CatNip cat);
+        void evaluateRequest(CatNip cat,Sensors sensors);
         void setupAwaitFrame(CatNip cat);
         void unsetAwaitFrame();
         void sendAwaitFrame();

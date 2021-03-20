@@ -82,7 +82,7 @@ void ClientSocket::disconect()
     }
 }
 
-void ClientSocket::checkForRequest()
+void ClientSocket::checkForRequest(Sensors sensors)
 {
     if (client.available())
     {
@@ -107,7 +107,7 @@ void ClientSocket::checkForRequest()
             Serial.println("Receive Frame");
             try
             {
-                this->evaluateRequest(cat);
+                this->evaluateRequest(cat,sensors);
             }
             catch (const std::exception &e)
             {
@@ -118,28 +118,28 @@ void ClientSocket::checkForRequest()
     this->sendAwaitFrame();
 }
 
-void ClientSocket::evaluateRequest(CatNip cat)
+void ClientSocket::evaluateRequest(CatNip cat,Sensors sensors)
 {
     CatNip catResponse;
     switch (cat.getPacketType())
     {
     case CatNip::ASK_HUMIDITY:
         catResponse.setPacketType(CatNip::DATA_HUMIDITY);
-        catResponse.setData(802); //equiv 80.5%
+        catResponse.setData((short)sensors.getHumidity()*10);
         setupAwaitFrame(catResponse);
         break;
     case CatNip::ASK_TEMPERATURE:
         catResponse.setPacketType(CatNip::DATA_TEMPERATURE);
-        catResponse.setData(215); //equiv 21.5°c
+        catResponse.setData((short)sensors.getAvgTemperature()*10); //equiv 21.5°c
         setupAwaitFrame(catResponse);
         break;
     case CatNip::ASK_WATT:
         catResponse.setPacketType(CatNip::DATA_CONSUMATION);
-        catResponse.setData(1140);
+        catResponse.setData((short)sensors.getPower());
         setupAwaitFrame(catResponse);
         break;
     case CatNip::ASK_IF_ON:
-        catResponse.setPacketType(CatNip::DATA_CONSUMATION);
+        catResponse.setPacketType(CatNip::DATA_ON);
         catResponse.setData(1);
         setupAwaitFrame(catResponse);
         break;
