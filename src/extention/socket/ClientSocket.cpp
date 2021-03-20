@@ -125,17 +125,17 @@ void ClientSocket::evaluateRequest(CatNip cat,Sensors sensors)
     {
     case CatNip::ASK_HUMIDITY:
         catResponse.setPacketType(CatNip::DATA_HUMIDITY);
-        catResponse.setData((short)sensors.getHumidity()*10);
+        catResponse.setData(sensors.getHumidity()*10);
         setupAwaitFrame(catResponse);
         break;
     case CatNip::ASK_TEMPERATURE:
         catResponse.setPacketType(CatNip::DATA_TEMPERATURE);
-        catResponse.setData((short)sensors.getAvgTemperature()*10); //equiv 21.5°c
+        catResponse.setData(sensors.getAvgTemperature()*10); //equiv 21.5°c
         setupAwaitFrame(catResponse);
         break;
     case CatNip::ASK_WATT:
         catResponse.setPacketType(CatNip::DATA_CONSUMATION);
-        catResponse.setData((short)sensors.getPower());
+        catResponse.setData(sensors.getPower());
         setupAwaitFrame(catResponse);
         break;
     case CatNip::ASK_IF_ON:
